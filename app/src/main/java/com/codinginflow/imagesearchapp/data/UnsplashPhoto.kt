@@ -1,4 +1,4 @@
-package com.codinginflow.imagesearchapp.models
+package com.codinginflow.imagesearchapp.data
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
