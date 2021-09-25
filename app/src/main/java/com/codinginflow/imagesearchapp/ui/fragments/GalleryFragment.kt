@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.codinginflow.imagesearchapp.R
 import com.codinginflow.imagesearchapp.adapter.UnsplashPhotoAdapter
+import com.codinginflow.imagesearchapp.adapter.UnsplashPhotoLoadStateAdapter
 import com.codinginflow.imagesearchapp.data.UnsplashPagingSource
 import com.codinginflow.imagesearchapp.data.UnsplashPhoto
 import com.codinginflow.imagesearchapp.databinding.FragmentGalleryBinding
@@ -29,11 +30,14 @@ class GalleryFragment : Fragment(R.layout.fragment_gallery) {
 
         binding.apply {
             rvRecyclerView.setHasFixedSize(true)
-            rvRecyclerView.adapter = adapter
+            rvRecyclerView.adapter = adapter.withLoadStateHeaderAndFooter(
+                header = UnsplashPhotoLoadStateAdapter { adapter.retry() },
+                footer = UnsplashPhotoLoadStateAdapter { adapter.retry() },
+            )
         }
 
         viewModel.photos.observe(viewLifecycleOwner) {
-            adapter.submitData(viewLifecycleOwner.lifecycle,it)
+            adapter.submitData(viewLifecycleOwner.lifecycle, it)
         }
     }
 
