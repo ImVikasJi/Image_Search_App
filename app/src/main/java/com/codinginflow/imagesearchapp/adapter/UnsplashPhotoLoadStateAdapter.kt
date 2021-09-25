@@ -29,7 +29,7 @@ class UnsplashPhotoLoadStateAdapter(private val retry: () -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
-            binding.btnRetry.setOnClickListener {
+            binding.btnRetry .setOnClickListener {
                 retry.invoke()
             }
         }
