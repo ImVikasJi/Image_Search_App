@@ -26,6 +26,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/btnRetry"
+        android:visibility="gone"
+        tools:visibility="visible"
         android:layout_centerHorizontal="true"
         android:text="Results could not be loaded" />
 
