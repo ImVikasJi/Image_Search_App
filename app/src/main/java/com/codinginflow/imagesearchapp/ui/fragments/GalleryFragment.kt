@@ -5,15 +5,17 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.paging.LoadState
 import com.codinginflow.imagesearchapp.R
 import com.codinginflow.imagesearchapp.adapter.UnsplashPhotoAdapter
 import com.codinginflow.imagesearchapp.adapter.UnsplashPhotoLoadStateAdapter
 import com.codinginflow.imagesearchapp.databinding.FragmentGalleryBinding
 import com.codinginflow.imagesearchapp.viewmodels.GalleryViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_gallery.*
+import kotlinx.android.synthetic.main.unsplash_photo_load_state_footer.*
 
 @AndroidEntryPoint
 class GalleryFragment : Fragment(R.layout.fragment_gallery) {
@@ -28,18 +30,42 @@ class GalleryFragment : Fragment(R.layout.fragment_gallery) {
 
         _binding = FragmentGalleryBinding.bind(view)
 
-        var adapter = UnsplashPhotoAdapter()
+        var rvAdapter = UnsplashPhotoAdapter()
 
-        binding.apply {
-            rvRecyclerView.setHasFixedSize(true)
-            rvRecyclerView.adapter = adapter.withLoadStateHeaderAndFooter(
-                header = UnsplashPhotoLoadStateAdapter { adapter.retry() },
-                footer = UnsplashPhotoLoadStateAdapter { adapter.retry() },
+        binding.rvRecyclerView.apply {
+            setHasFixedSize(true)
+            itemAnimator = null
+            adapter = rvAdapter.withLoadStateHeaderAndFooter(
+                header = UnsplashPhotoLoadStateAdapter { rvAdapter.retry() },
+                footer = UnsplashPhotoLoadStateAdapter { rvAdapter.retry() },
             )
         }
 
+        binding.btnRetry.setOnClickListener {
+            rvAdapter.retry()
+        }
+
         viewModel.photos.observe(viewLifecycleOwner) {
-            adapter.submitData(viewLifecycleOwner.lifecycle, it)
+            rvAdapter.submitData(viewLifecycleOwner.lifecycle, it)
+        }
+
+        rvAdapter.addLoadStateListener { loadState ->
+            binding.apply {
+                pbProgressBar.isVisible = loadState.source.refresh is LoadState.Loading
+                rvRecyclerView.isVisible = loadState.source.refresh is LoadState.NotLoading
+                btnRetry.isVisible = loadState.source.refresh is LoadState.Error
+                tvError.isVisible = loadState.source.refresh is LoadState.Error
+
+                // empty view
+                if (loadState.source.refresh is LoadState.NotLoading &&
+                    loadState.append.endOfPaginationReached &&
+                    rvAdapter.itemCount < 1) {
+                    rvRecyclerView.isVisible = false
+                    tvEmpty.isVisible = true
+                } else {
+                    tvEmpty.isVisible = false
+                }
+            }
         }
 
         setHasOptionsMenu(true)
@@ -53,9 +79,9 @@ class GalleryFragment : Fragment(R.layout.fragment_gallery) {
         val searchItem = menu.findItem(R.id.menuSearch)
         val searchView = searchItem.actionView as SearchView
 
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                if(query != null){
+                if (query != null) {
                     binding.rvRecyclerView.scrollToPosition(0)
                     viewModel.searchPhotos(query)
                     searchView.clearFocus()
