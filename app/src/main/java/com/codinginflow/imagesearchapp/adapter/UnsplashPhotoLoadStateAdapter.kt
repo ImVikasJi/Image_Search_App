@@ -49,5 +49,4 @@ class UnsplashPhotoLoadStateAdapter(private val retry: () -> Unit) :
 //            }
         }
     }
-
 }

@@ -7,4 +7,5 @@ object Constants {
     const val BASE_URL = "https://api.unsplash.com/"
     const val UNSPLASH_STARTING_PAGE_INDEX = 1
     const val DEFAULT_QUERY = "cats"
+    const val CURRENT_QUERY = "current_query"
 }
